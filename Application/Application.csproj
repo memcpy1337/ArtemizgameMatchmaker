@@ -31,7 +31,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Commands\" />
       <Folder Include="Common\Settings\" />
       <Folder Include="Queries\Users\" />
     </ItemGroup>

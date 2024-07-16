@@ -1,4 +1,8 @@
+using Application.Commands.User;
 using Application.Common.Behaviours;
+using Application.Common.DTOs;
+using Application.Common.Interfaces;
+using Application.Services;
 using FluentValidation;
 using Forbids;
 using Mapster;
@@ -20,18 +24,20 @@ public static class ServiceCollectionExtension
     /// </summary>
     /// <param name="services"><see cref="IServiceCollection"/> Interface</param>
     /// <param name="configuration"><see cref="IConfiguration"/> Interface</param>
-    public static void AddApplication(this IServiceCollection services,IConfiguration configuration)
+    public static void AddApplication(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton(TypeAdapterConfig.GlobalSettings);
         services.AddScoped<IMapper, ServiceMapper>();
-        services.AddValidatorsFromAssembly(AssemblyReference.Assembly);
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(AppDomain.CurrentDomain.GetAssemblies()));
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehaviour<,>));
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TaskCanceledExceptionBehaviour<,>));
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(PerformanceBehaviour<,>));
-        services.AddHttpContextAccessor();
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(AuthorizedUserContextBehavior<,>));
+        services.AddValidatorsFromAssemblyContaining(typeof(Application.AssemblyReference), includeInternalTypes: true);
+
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblies(AppDomain.CurrentDomain.GetAssemblies());
+            cfg.AddOpenBehavior(typeof(ValidationBehaviour<,>));
+            cfg.AddOpenBehavior(typeof(TaskCanceledExceptionBehaviour<,>));
+        });
+
+
         services.AddForbids();
     }
 }
