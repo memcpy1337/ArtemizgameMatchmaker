@@ -9,7 +9,7 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 # Copy project files and restore dependencies
-COPY ["QueueWorker/UserService.API.csproj", "QueueWorker/"]
+COPY ["QueueWorker/QueueWorker.csproj", "QueueWorker/"]
 RUN dotnet restore "QueueWorker/QueueWorker.csproj"
 COPY . .
 WORKDIR "/src/QueueWorker"
