@@ -22,7 +22,7 @@
       "WithThreadId"
     ],
     "Properties": {
-      "ApplicationName": "UserService"
+      "ApplicationName": "MatchmakingService"
     }
   }
 }

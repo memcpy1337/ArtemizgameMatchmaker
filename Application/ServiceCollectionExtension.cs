@@ -1,4 +1,3 @@
-using Application.Commands.User;
 using Application.Common.Behaviours;
 using Application.Common.DTOs;
 using Application.Common.Interfaces;
@@ -27,7 +26,13 @@ public static class ServiceCollectionExtension
     public static void AddApplication(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton(TypeAdapterConfig.GlobalSettings);
+        services.AddTransient<IQueueWorkerService, QueueWorkerService>();
         services.AddScoped<IMapper, ServiceMapper>();
+        services.AddTransient<IMatchService, MatchService>();
+        services.AddTransient<IQueueService, QueueService>();
+        services.AddTransient<ITaskWorkerService, TaskWorkerService>();
+        services.AddTransient<ITaskService, TaskService>();
+
         services.AddValidatorsFromAssemblyContaining(typeof(Application.AssemblyReference), includeInternalTypes: true);
 
         services.AddMediatR(cfg =>
@@ -37,7 +42,16 @@ public static class ServiceCollectionExtension
             cfg.AddOpenBehavior(typeof(TaskCanceledExceptionBehaviour<,>));
         });
 
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehaviour<,>));
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TaskCanceledExceptionBehaviour<,>));
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(PerformanceBehaviour<,>));
+        services.AddHttpContextAccessor();
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(AuthorizedUserContextBehavior<,>));
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(UserIpContextBehaviour<,>));
 
+        services.AddHostedService<QueueTick>();
+        services.AddHostedService<TaskQueueTick>();
         services.AddForbids();
     }
 }

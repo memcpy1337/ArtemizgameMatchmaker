@@ -50,6 +50,9 @@ namespace Infrastructure.Migrations
                     b.Property<int>("Regime")
                         .HasColumnType("integer");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("MatchId");
@@ -67,10 +70,6 @@ namespace Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Ip")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
@@ -80,17 +79,13 @@ namespace Infrastructure.Migrations
                     b.Property<int>("MatchId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Port")
-                        .HasColumnType("integer");
-
                     b.Property<string>("ServerId")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MatchId")
-                        .IsUnique();
+                    b.HasIndex("MatchId");
 
                     b.ToTable("Servers");
                 });
@@ -106,61 +101,77 @@ namespace Infrastructure.Migrations
                     b.Property<int>("Elo")
                         .HasColumnType("integer");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<int?>("MatchId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("PlayerType")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Regime")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Ticket")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MatchId");
-
                     b.HasIndex("UserId");
 
-                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("UserId"), new[] { "IsActive" });
-
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Domain.Entities.UserToMatch", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MatchId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsConnected")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("UserIp")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("UserType")
+                        .HasColumnType("integer");
+
+                    b.HasKey("UserId", "MatchId");
+
+                    b.HasIndex("MatchId");
+
+                    b.ToTable("UserToMatches");
                 });
 
             modelBuilder.Entity("Domain.Entities.Server", b =>
                 {
                     b.HasOne("Domain.Entities.Match", "Match")
-                        .WithOne("Server")
-                        .HasForeignKey("Domain.Entities.Server", "MatchId")
+                        .WithMany()
+                        .HasForeignKey("MatchId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Match");
                 });
 
-            modelBuilder.Entity("Domain.Entities.User", b =>
+            modelBuilder.Entity("Domain.Entities.UserToMatch", b =>
                 {
                     b.HasOne("Domain.Entities.Match", "Match")
                         .WithMany("Users")
-                        .HasForeignKey("MatchId");
+                        .HasForeignKey("MatchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Match");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Entities.Match", b =>
                 {
-                    b.Navigation("Server");
-
                     b.Navigation("Users");
                 });
 #pragma warning restore 612, 618

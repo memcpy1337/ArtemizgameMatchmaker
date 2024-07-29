@@ -1,8 +1,11 @@
 ﻿using Application.Common.Interfaces;
+using Domain.Entities;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,40 +13,29 @@ namespace Application.Services;
 
 public class QueueWorkerService : IQueueWorkerService
 {
+    private readonly IQueueService _queueService;
+    private readonly IMatchService _matchService;
     private readonly IUserRepository _userRepository;
-    private readonly IMatchRepository _matchRepository;
-    private readonly IPublishService _publishService;
 
-    public QueueWorkerService(IUserRepository userRepository, IMatchRepository matchRepository, IPublishService publishService)
+    public QueueWorkerService(IQueueService queueService, IMatchService matchService, IUserRepository userRepository)
     {
+        _queueService = queueService;
+        _matchService = matchService;
         _userRepository = userRepository;
-        _matchRepository = matchRepository;
-        _publishService = publishService;
     }
 
     public async Task ExecuteAsync()
     {
-        var user = await _userRepository.PopFromQueue();
+        var queueRequest = await _queueService.GetUserFromQueueAsync();
+
+        if (queueRequest == null)
+            return;
+
+        User? user = await _userRepository.GetAsync(queueRequest.UserId, CancellationToken.None);
 
         if (user == null)
             return;
 
-        var match = await _matchRepository.GetMatchForPlayer(user, user.Elo - 1000, user.Elo + 1000);
-
-        if (match == null)
-        {
-            match = await _matchRepository.CreateAndAdd(user);
-
-            if (match == null)
-            {
-                await _userRepository.ReturnToQueue(user.UserId);
-                return;
-            }
-
-            await _publishService.NewMatchCreated(match.MatchId, match.Regime);
-        }
-
-        await _publishService.UserAddToMatch(match.MatchId, user.UserId, match.Server != null);
-
+        await _matchService.AddOrCreate(user, queueRequest.UserIp, queueRequest.GameRegime, queueRequest.PlayerType);
     }
 }

@@ -12,8 +12,6 @@ public class Server
     public required string ServerId { get; set; }
     public bool IsReady { get; set; }
     public bool IsActive { get; set; }
-    public string Ip { get; set; } = string.Empty;
-    public int Port { get; set; }
     public int MatchId { get; set; }
     public Match Match { get; set; } = null!;
 }

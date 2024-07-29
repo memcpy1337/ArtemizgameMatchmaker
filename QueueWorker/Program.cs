@@ -2,7 +2,6 @@ using System.Net;
 using System.Reflection;
 using System.Text.Json;
 using Application;
-using Application.Common.Interfaces;
 using Application.Common.Models;
 using Application.Services;
 using FluentValidation.AspNetCore;
@@ -14,6 +13,7 @@ using Microsoft.Extensions.Configuration.UserSecrets;
 using QueueWorker;
 using Infrastructure.Persistance;
 using Microsoft.EntityFrameworkCore;
+using Application.Common.Interfaces;
 
 public class Program
 {

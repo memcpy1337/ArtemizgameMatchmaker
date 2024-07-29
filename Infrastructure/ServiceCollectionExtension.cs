@@ -4,8 +4,8 @@ using FluentValidation;
 using Infrastructure.Common.Models;
 using Infrastructure.Consumers;
 using Infrastructure.Persistance;
+using Infrastructure.Publishers;
 using Infrastructure.Repositories;
-using Infrastructure.Services;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -29,16 +29,22 @@ public static class ServiceCollectionExtension
     public static void AddInfrastructure(this IServiceCollection services,IConfiguration configuration)
     {
         services.AddTransient<IUserRepository, UserRepository>();
-        services.AddTransient<IQueueService, QueueService>();
         services.AddTransient<IMatchRepository, MatchRepository>();
-        services.AddTransient<IPublishService, PublishService>();
-
-        services.AddValidatorsFromAssemblyContaining<UserQueueDtoValidator>();
+        services.AddTransient<IMatchPublisher, MatchPublisher>();
+        services.AddTransient<IQueuePublisher, QueuePublisher>();
+        services.AddTransient<IQueueRepository, QueueRepository>();
+        services.AddTransient<IUserToMatchRepository, UserToMatchRepository>();
+        services.AddTransient<IRedisTaskRepository, RedisTaskRepository>();
 
         services.AddMassTransit(busConfig =>
         {
             busConfig.SetKebabCaseEndpointNameFormatter(); //user-created-event
-            busConfig.AddConsumer<AddUserToQueueConsumer>();
+            busConfig.AddConsumer<UserRegisterConsumer>();
+            busConfig.AddConsumer<ServerDeployConsumer>();
+            busConfig.AddConsumer<PlayerConnectionConsumer>();
+            busConfig.AddConsumer<PlayerDisconnectionConsumer>();
+            busConfig.AddConsumer<ServerReadyConsumer>();
+
 #if DEBUG
             var stringSettings = Environment.GetEnvironmentVariable("MessageBrokerDebug");
             var settings = JsonConvert.DeserializeObject<MessageBrokerSettings>(stringSettings);
@@ -54,10 +60,16 @@ public static class ServiceCollectionExtension
                     h.Password(settings.Password!);
                 });
 
+                configuration.ReceiveEndpoint("user-register-queue-matchmaking", e =>
+                {
+                    e.ConfigureConsumer<UserRegisterConsumer>(context);
+                });
+
                 configuration.ConfigureEndpoints(context);
             });
-        });
 
+
+        });
 
 #if DEBUG
         var redisStringSettings = Environment.GetEnvironmentVariable("RedisSettingsMatchmakerDebug");

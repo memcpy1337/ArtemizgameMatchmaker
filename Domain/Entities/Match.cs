@@ -13,6 +13,6 @@ public class Match
     public bool IsActive { get; set; }
     public DateTime DateCreated { get; set; }
     public DateTime DateFinish { get; set; }
-    public Server? Server { get; set; }
-    public ICollection<User> Users { get; } = new List<User>();
+    public ICollection<UserToMatch> Users { get; } = new List<UserToMatch>();
+    public MatchStatusEnum Status { get; set; } = MatchStatusEnum.Init;
 }

@@ -8,6 +8,7 @@ using FluentValidation.AspNetCore;
 using Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Netjection;
@@ -33,6 +34,17 @@ public class Startup
                 .WithOrigins(Configuration.GetValue<string[]>("Cors"))
                 .AllowCredentials()
         ));
+
+        services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor |
+                ForwardedHeaders.XForwardedProto;
+            // Only loopback proxies are allowed by default.
+            // Clear that restriction because forwarders are enabled by explicit 
+            // configuration.
+            options.KnownNetworks.Clear();
+            options.KnownProxies.Clear();
+        });
 
         services.AddInfrastructure(Configuration);
         services.AddApplication(Configuration);
@@ -83,7 +95,12 @@ public class Startup
             });
         });
 
+        app.UseRouting();
+
         app.UseAuthentication();
         app.UseAuthorization();
+
+        app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+
     }
 }

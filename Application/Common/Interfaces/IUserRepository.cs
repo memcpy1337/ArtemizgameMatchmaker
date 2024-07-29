@@ -13,10 +13,6 @@ namespace Application.Common.Interfaces;
 public interface IUserRepository
 {
     Task AddAsync(User user, CancellationToken cancellationToken);
-    Task RemoveAsync(string userId);
     Task<User?> GetAsync(string userId, CancellationToken cancellationToken);
-    Task<bool> AnyAsync(string userId);
     bool Any(string userId);
-    Task<User?> PopFromQueue();
-    Task ReturnToQueue(string userId);
 }

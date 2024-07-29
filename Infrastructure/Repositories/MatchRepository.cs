@@ -1,4 +1,5 @@
-﻿using Application.Common.Interfaces;
+﻿using Application.Common.DTOs;
+using Application.Common.Interfaces;
 using Contracts.Common.Helpers;
 using Contracts.Common.Models.Enums;
 using Domain.Entities;
@@ -15,74 +16,67 @@ namespace Infrastructure.Repositories;
 public class MatchRepository : IMatchRepository
 {
     private readonly IApplicationDbContext _applicationDb;
+    private readonly IUserToMatchRepository _userToMatch;
 
-    public MatchRepository(IApplicationDbContext applicationDb)
+    public MatchRepository(IApplicationDbContext applicationDb, IUserToMatchRepository userToMatch)
     {
         _applicationDb = applicationDb;
+        _userToMatch = userToMatch;
     }
 
-   public async Task<Match> CreateAndAdd(User player)
-   {
+    public async Task<Match?> Get(string matchId)
+    {
+        return await _applicationDb.Matches.Include(u => u.Users.Where(x => x.IsActive)).FirstOrDefaultAsync(x => x.MatchId == matchId && x.IsActive);
+    }
 
-        var match = new Match() {
+    public async Task UpdateStatus(MatchStatusEnum status, string matchId)
+    {
+        await _applicationDb.Matches.Where(x => x.MatchId == matchId)
+           .ExecuteUpdateAsync(b => b.SetProperty(u => u.Status, status));
+
+        await _applicationDb.SaveChangesAsync(CancellationToken.None);
+    }
+
+    public async Task<Match> CreateAsync(GameTypeEnum gameType, User owner)
+    {
+        var match = new Match()
+        {
             MatchId = Guid.NewGuid().ToString(),
             DateCreated = DateTime.Now.ToUniversalTime(),
             IsActive = true,
-            OwnerUserId = player.UserId,
-            Regime = player.Regime
+            Status = MatchStatusEnum.WaitForPlayers,
+            OwnerUserId = owner.UserId,
+            Regime = gameType
         };
 
         await _applicationDb.Matches.AddAsync(match);
-
-        player.Match = match;
-
-        _applicationDb.Users.Update(player);
 
         await _applicationDb.SaveChangesAsync(CancellationToken.None);
 
         return match;
     }
 
-    public async Task<Match?> GetMatchForPlayer(User player, int eloMin, int eloMax)
+    public async Task<Match?> GetMatchWithParams(int eloMin, int eloMax, PlayerTypeEnum playerType, GameTypeEnum gameType)
     {
-        int targetPlayers = Helpers.GetTargetPlayersCountForGameType(player.Regime, player.PlayerType);
+        int targetPlayers = Helpers.GetTargetPlayersCountForGameType(gameType, playerType);
 
-        using (var transaction = await _applicationDb.DatabaseFescade.BeginTransactionAsync())
+        var request = await _applicationDb.Matches
+            .Include(s => s.Users.Where(x => x.IsActive)).ThenInclude(x => x.User)
+            .Where(x => x.IsActive == true &&
+                    x.Regime == gameType &&
+                    x.Users.Count(u => u.UserType == playerType) < targetPlayers)
+            .Select(x => new
+            {
+                Match = x,
+                AvgElo = x.Users.Average(u => (double?)u.User.Elo)
+            })
+            .FirstOrDefaultAsync(x => x.AvgElo >= eloMin && x.AvgElo <= eloMax && x.Match.Status == MatchStatusEnum.WaitForPlayers);
+
+        if (request == null)
         {
-            try
-            {
-                var request = await _applicationDb.Matches
-                    .Include(s => s.Users)
-                    .Include(ser => ser.Server)
-                    .Where(x => x.IsActive == true &&
-                            x.Regime == player.Regime &&
-                            x.Users.Count(u => u.PlayerType == player.PlayerType) < targetPlayers)
-                    .Select(x => new
-                                {
-                                    Match = x,
-                                    AvgElo = x.Users.Average(u => (double?)u.Elo)
-                                })
-                    .FirstOrDefaultAsync(x => x.AvgElo >= eloMin && x.AvgElo <= eloMax);
-
-                if (request == null)
-                {
-                    return null;
-                }
-
-                player.Match = request.Match;
-                _applicationDb.Users.Update(player);
-
-                await _applicationDb.SaveChangesAsync(CancellationToken.None);
-                await transaction.CommitAsync();
-
-                return request.Match;
-            }
-            catch
-            {
-                await transaction.RollbackAsync();
-                return null;
-            }
+            return null;
         }
-    }
 
+        return request.Match;
+    }
 }
