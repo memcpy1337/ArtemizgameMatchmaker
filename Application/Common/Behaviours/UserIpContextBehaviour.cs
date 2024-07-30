@@ -29,16 +29,11 @@ public class UserIpContextBehaviour<TRequest, TResponse> : IPipelineBehavior<TRe
         {
             if (request is IUserIp userRequest)
             {
-                var forwardedFor = httpContext.Request.Headers["X-Forwarded-For"].ToString();
-                var forwardedForIp = httpContext.Request.Headers["X-Real-Ip"].ToString();
+                var realIp = httpContext.Request.Headers["X-Real-Ip"].ToString();
 
-                Console.WriteLine(forwardedForIp);
-
-                if (!string.IsNullOrEmpty(forwardedFor))
+                if (!string.IsNullOrEmpty(realIp))
                 {
-                    Console.WriteLine(forwardedFor);
-                    var ipAddresses = forwardedFor.Split(',');
-                    userRequest.UserIp = ipAddresses[0];
+                    userRequest.UserIp = realIp;
                 }
             }
         }
