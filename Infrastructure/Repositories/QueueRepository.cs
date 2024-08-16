@@ -35,42 +35,53 @@ public class QueueRepository : IQueueRepository
         await _queue.StringSetAsync($"{DATA_PREFIX_NAME}{userQueueRequest.UserId}", jsonR);
     }
 
-    public async Task<UserQueueRequest?> PopAsync()
+    public async Task<List<UserQueueRequest>?> PopAsync(int count)
     {
-        var userId = await _queue.ListLeftPopAsync(QUEUE_NAME);
+        var userIds = await _queue.ListLeftPopAsync(QUEUE_NAME, count);
 
-        if (userId.IsNullOrEmpty)
+        if (userIds == null || userIds.Length == 0)
             return null;
 
-        string? playerData = await _queue.StringGetAsync($"{DATA_PREFIX_NAME}{userId}");
+        List<UserQueueRequest> output = [];
 
-        if (playerData == null)
+        foreach(var userId in userIds)
         {
-            return null;
+            string? playerData = await _queue.StringGetAsync($"{DATA_PREFIX_NAME}{userId}");
+
+            if (playerData == null)
+            {
+                continue;
+            }
+
+            //await _queue.KeyDeleteAsync($"{DATA_PREFIX_NAME}{userId}");
+
+            var requestData = JsonConvert.DeserializeObject<UserQueueRequest>(playerData);
+
+            if (requestData != null)
+                output.Add(requestData);
         }
 
-        await _queue.KeyDeleteAsync($"{DATA_PREFIX_NAME}{userId}");
-
-        return JsonConvert.DeserializeObject<UserQueueRequest>(playerData);
+        return output;
     }
 
     public async Task RemoveUserFromQueueAsync(string userId, CancellationToken cancellationToken)
     {
         long removedFromList = await _queue.ListRemoveAsync(QUEUE_NAME, userId);
 
-        if (removedFromList > 0)
-        {
-            await _queue.KeyDeleteAsync($"{DATA_PREFIX_NAME}{userId}");
-        }
+        await _queue.KeyDeleteAsync($"{DATA_PREFIX_NAME}{userId}");
     }
 
     public async Task<bool> IsInQueue(string userId)
     {
-        return await _queue.ListPositionAsync(QUEUE_NAME, userId) != -1;
+        return await _queue.KeyExistsAsync($"{DATA_PREFIX_NAME}{userId}");
     }
 
-    public async Task ReturnToQueueAsync(UserQueueRequest userQueueRequest, CancellationToken cancellationToken)
+
+    public async Task ReturnToQueueAsync(List<UserQueueRequest> userQueueRequests, CancellationToken cancellationToken)
     {
-        await PushAsync(userQueueRequest, cancellationToken);
+        foreach (var userQueueRequest in userQueueRequests)
+        {
+            await _queue.ListRightPushAsync(QUEUE_NAME, userQueueRequest.UserId);
+        }
     }
 }

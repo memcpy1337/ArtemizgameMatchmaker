@@ -31,11 +31,20 @@ public sealed class UserRepository : IUserRepository
 
     public bool Any(string userId)
     {
-        return _applicationDb.Users.Any(x => x.UserId == userId);
+        return _applicationDb.Users.Any(x => x.Id == userId);
     }
 
     public async Task<User?> GetAsync(string userId, CancellationToken cancellationToken)
     {
-        return await _applicationDb.Users.FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken);
+        return await _applicationDb.Users.FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
+    }
+
+    public async Task UpdateUserElo(string userId, int newElo)
+    {
+        await _applicationDb.Users
+        .Where(x => x.Id == userId)
+        .ExecuteUpdateAsync(b => b.SetProperty(x => x.Elo, newElo));
+
+        await _applicationDb.SaveChangesAsync(CancellationToken.None);
     }
 }

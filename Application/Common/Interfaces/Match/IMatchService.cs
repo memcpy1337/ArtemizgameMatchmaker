@@ -1,4 +1,5 @@
-﻿using Contracts.Common.Models.Enums;
+﻿using Application.Common.DTOs;
+using Contracts.Common.Models.Enums;
 using Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -10,8 +11,11 @@ namespace Application.Common.Interfaces;
 
 public interface IMatchService
 {
-    Task AddOrCreate(User user, string userIp, GameTypeEnum gameType, PlayerTypeEnum playerType);
-    Task UpdateMatchStatus(MatchStatusEnum matchStatus, string matchId);
-    Task CancelMatch(string matchId, string reasonMsg);
-    Task RemovePlayerFromMatch(User user);
+    Task CreateMatch(Match match, List<UserQueueRequest> players);
+    Task CancelMatch(string matchId, MatchCancelEnum matchCancel);
+    Task MatchEnd(string matchId, PlayerTypeEnum wonSide);
+    Task RemovePlayerFromMatch(string userId);
+    Task UserConnectedToMatch(string userId);
+    Task UserDisconnectedFromMatch(string userId);
+    Task<bool> UpdateMatchStatus(MatchStatusEnum matchStatus, string matchId);
 }

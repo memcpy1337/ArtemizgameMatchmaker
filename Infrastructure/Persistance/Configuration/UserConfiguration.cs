@@ -15,6 +15,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
     {
         builder.HasKey(i => i.Id);
 
-        builder.HasIndex(x => x.UserId);
+        builder.HasIndex(x => x.Id);
     }
 }

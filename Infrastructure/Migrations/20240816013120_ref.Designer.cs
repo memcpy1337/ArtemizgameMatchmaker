@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240729025834_work")]
-    partial class work
+    [Migration("20240816013120_ref")]
+    partial class @ref
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,11 +27,8 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Match", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp with time zone");
@@ -41,10 +38,6 @@ namespace Infrastructure.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
-
-                    b.Property<string>("MatchId")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<string>("OwnerUserId")
                         .IsRequired()
@@ -58,20 +51,17 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MatchId");
+                    b.HasIndex("Id");
 
-                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("MatchId"), new[] { "IsActive" });
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Id"), new[] { "IsActive" });
 
                     b.ToTable("Matches");
                 });
 
             modelBuilder.Entity("Domain.Entities.Server", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
@@ -79,10 +69,7 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("IsReady")
                         .HasColumnType("boolean");
 
-                    b.Property<int>("MatchId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ServerId")
+                    b.Property<string>("MatchId")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -95,32 +82,28 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.User", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
 
                     b.Property<int>("Elo")
                         .HasColumnType("integer");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("Id");
 
                     b.ToTable("Users");
                 });
 
             modelBuilder.Entity("Domain.Entities.UserToMatch", b =>
                 {
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
 
-                    b.Property<int>("MatchId")
+                    b.Property<string>("MatchId")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Id")
                         .HasColumnType("integer");
 
                     b.Property<bool>("IsActive")
@@ -128,6 +111,10 @@ namespace Infrastructure.Migrations
 
                     b.Property<bool>("IsConnected")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("Ticket")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("UserIp")
                         .IsRequired()

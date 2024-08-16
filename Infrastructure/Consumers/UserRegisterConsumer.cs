@@ -18,7 +18,7 @@ public sealed class UserRegisterConsumer : IConsumer<UserRegisterEvent>
 
     public async Task Consume(ConsumeContext<UserRegisterEvent> context)
     {
-        var user = new User() { UserId = context.Message.Id, Elo = 600 };
+        var user = new User() { Id = context.Message.Id, Elo = 600 };
         await _userRepository.AddAsync(user, context.CancellationToken);
     }
 }

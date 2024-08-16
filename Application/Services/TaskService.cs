@@ -47,13 +47,13 @@ public class TaskService : ITaskService
             return;
         }
 
-        await _matchService.CancelMatch(matchId, "Server not UP over time");
+        await _matchService.CancelMatch(matchId, MatchCancelEnum.ServerCantBeInit);
     }
 
     private async Task PlayersReadyTimeoutHandler(string matchId)
     {
         var match = await _matchRepository.Get(matchId);
-        if (match == null || match.Status != MatchStatusEnum.WaitForPlayers)
+        if (match == null || match.Status != MatchStatusEnum.WaitPlayerConnect)
         {
             _logger.LogWarning($"Error timeout for players wait: {matchId}");
             return;
@@ -64,9 +64,7 @@ public class TaskService : ITaskService
         if (usersNotConnected.Count == 0)
             return;
 
-        foreach(var user in usersNotConnected)
-        {
-            await _matchService.RemovePlayerFromMatch(user.User);
-        }
+        await _matchService.CancelMatch(matchId, MatchCancelEnum.SomePlayersNotConnected);
+
     }
 }

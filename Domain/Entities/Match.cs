@@ -6,8 +6,7 @@ using System.Collections.Generic;
 namespace Domain.Entities;
 public class Match
 {
-    public int Id { get; set; }
-    public required string MatchId { get; set; }
+    public required string Id { get; set; }
     public GameTypeEnum Regime { get; set; }
     public required string OwnerUserId { get; set; }
     public bool IsActive { get; set; }

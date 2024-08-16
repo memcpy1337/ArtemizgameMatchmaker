@@ -38,7 +38,7 @@ internal sealed class PlayUserCommandHandler : IHandlerWrapper<PlayUserCommand, 
 
     public async Task<IResponse<PlayResponse>> Handle(PlayUserCommand request, CancellationToken cancellationToken)
     {
-        var isInQueue = await _queueService.IsInQueue(request.User.UserId);
+        var isInQueue = await _queueService.IsInQueue(request.User.Id);
         var isInMatch = await _userToMatchRepository.IsUserInMatch(request.User);
 
         _forbid.True(isInQueue || isInMatch, UserAlreadyInMatchException.Instance);
@@ -51,7 +51,7 @@ internal sealed class PlayUserCommandHandler : IHandlerWrapper<PlayUserCommand, 
 
         await _queueService.AddUserToQueueAsync(new UserQueueRequest()
         {
-            UserId = request.User.UserId,
+            UserId = request.User.Id,
             UserIp = request.UserIp,
             Elo = request.User.Elo,
             GameRegime = request.PlayUserRequest.GameRegime,

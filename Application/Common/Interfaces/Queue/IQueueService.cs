@@ -16,7 +16,7 @@ public interface IQueueService
     Task AddUserToQueueAsync(UserQueueRequest userQueueRequest, CancellationToken cancellationToken);
     Task RemoveUserFromQueueAsync(string userId, CancellationToken cancellationToken);
 
-    Task ReturnToQueueAsync(UserQueueRequest userQueueRequest, CancellationToken cancellationToken);
-    Task<UserQueueRequest?> GetUserFromQueueAsync();
+    Task ReturnToQueueAsync(List<UserQueueRequest> userQueueRequests, CancellationToken cancellationToken);
+    Task<List<UserQueueRequest>?> GetUsersFromQueueAsync(int count);
     Task<bool> IsInQueue(string userId);
 }

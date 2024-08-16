@@ -9,16 +9,16 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Consumers;
 
-public class PlayerDisconnectionConsumer : IConsumer<ServerPlayerDisconnectedEvent>
+public sealed class ServerGameEndConsumer : IConsumer<ServerGameEndEvent>
 {
     private readonly IMatchService _matchService;
-    public PlayerDisconnectionConsumer(IMatchService matchService)
+    public ServerGameEndConsumer(IMatchService matchService, IMatchRepository matchRepository)
     {
         _matchService = matchService;
     }
 
-    public async Task Consume(ConsumeContext<ServerPlayerDisconnectedEvent> context)
+    public async Task Consume(ConsumeContext<ServerGameEndEvent> context)
     {
-        await _matchService.UserDisconnectedFromMatch(context.Message.UserId);
+        await _matchService.MatchEnd(context.Message.ServerId, context.Message.WonSide); //NEED RENAME PROPERTY
     }
 }

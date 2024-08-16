@@ -15,4 +15,5 @@ public interface IUserRepository
     Task AddAsync(User user, CancellationToken cancellationToken);
     Task<User?> GetAsync(string userId, CancellationToken cancellationToken);
     bool Any(string userId);
+    Task UpdateUserElo(string userId, int newElo);
 }

@@ -13,8 +13,8 @@ namespace Application.Common.Interfaces;
 [InjectAsScoped]
 public interface IMatchRepository
 {
-    Task<Match> CreateAsync(GameTypeEnum gameType, User owner);
-    Task<Match?> GetMatchWithParams(int eloMin, int eloMax, PlayerTypeEnum playerType, GameTypeEnum gameType);
+    Task<Match> CreateAsync(Match match);
+    //Task<Match?> GetMatchWithParams(int eloMin, int eloMax, PlayerTypeEnum playerType, GameTypeEnum gameType);
     Task<Match?> Get(string matchId);
     Task UpdateStatus(MatchStatusEnum status, string matchId);
 }

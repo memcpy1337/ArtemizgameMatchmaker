@@ -1,4 +1,5 @@
-﻿using Contracts.Events.ServerEvents;
+﻿using Application.Common.Interfaces;
+using Contracts.Events.ServerEvents;
 using MassTransit;
 using System;
 using System.Collections.Generic;
@@ -10,8 +11,14 @@ namespace Infrastructure.Consumers;
 
 public class PlayerConnectionConsumer : IConsumer<ServerPlayerConnectedEvent>
 {
-    public Task Consume(ConsumeContext<ServerPlayerConnectedEvent> context)
+    private readonly IMatchService _matchService;
+    public PlayerConnectionConsumer(IMatchService matchService)
     {
-        throw new NotImplementedException();
+        _matchService = matchService;
+    }
+
+    public async Task Consume(ConsumeContext<ServerPlayerConnectedEvent> context)
+    {
+       await _matchService.UserConnectedToMatch(context.Message.UserId);
     }
 }

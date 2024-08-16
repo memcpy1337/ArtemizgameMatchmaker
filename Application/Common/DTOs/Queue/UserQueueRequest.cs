@@ -11,4 +11,5 @@ public class UserQueueRequest
     public PlayerTypeEnum PlayerType { get; set; }
     public GameTypeEnum GameRegime { get; set; }
     public Guid Ticket { get; set; }
+
 }

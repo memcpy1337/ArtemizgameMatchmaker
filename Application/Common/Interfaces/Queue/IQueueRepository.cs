@@ -11,8 +11,8 @@ namespace Application.Common.Interfaces;
 public interface IQueueRepository
 {
     Task PushAsync(UserQueueRequest userQueueRequest, CancellationToken cancellationToken);
-    Task<UserQueueRequest?> PopAsync();
+    Task<List<UserQueueRequest>?> PopAsync(int count);
     Task RemoveUserFromQueueAsync(string userId, CancellationToken cancellationToken);
-    Task ReturnToQueueAsync(UserQueueRequest userQueueRequest, CancellationToken cancellationToken);
+    Task ReturnToQueueAsync(List<UserQueueRequest> userQueueRequests, CancellationToken cancellationToken);
     Task<bool> IsInQueue(string userId);
 }

@@ -22,7 +22,7 @@ public class ServerDeployConsumer : IConsumer<ServerDeployEvent>
         }
         else
         {
-            await _matchService.CancelMatch(context.Message.MatchId, context.Message.Message!);
+            await _matchService.CancelMatch(context.Message.MatchId, MatchCancelEnum.InternalError);
         }
     }
 }

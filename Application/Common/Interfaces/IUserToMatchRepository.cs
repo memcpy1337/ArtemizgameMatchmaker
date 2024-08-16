@@ -13,9 +13,13 @@ namespace Application.Common.Interfaces;
 [InjectAsScoped]
 public interface IUserToMatchRepository
 {
-    Task<UserToMatch?> AddUserToMatchAsync(User user, Match match, string userIp, PlayerTypeEnum playerType, GameTypeEnum gameType);
-    Task RemoveUserFromMatch(User user);
+    Task<UserToMatch?> AddUserToMatchAsync(User user, Match match, string ticket, string userIp, PlayerTypeEnum playerType, GameTypeEnum gameType);
+    Task RemoveUserFromMatch(string userId);
     Task<bool> IsUserInMatch(User user);
     Task ClearAllUsersFromMatch(Match match);
     Task<List<UserToMatch>> GetNotConnectedUsersFromMatch(Match match);
+    Task<UserToMatch?> GetUserPlayDataByTicket(string ticket, string matchId);
+    Task SetUserConnectionStatus(string userId, bool isConnected);
+    Task<Match?> GetMatchByParticipant(string userId);
+    Task<List<UserToMatch>> GetActiveUsersInMatch(string matchId);
 }

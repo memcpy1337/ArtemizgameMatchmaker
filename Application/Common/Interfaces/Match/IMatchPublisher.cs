@@ -1,4 +1,5 @@
-﻿using Contracts.Common.Models.Enums;
+﻿using Contracts.Common.Models;
+using Contracts.Common.Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,8 @@ public interface IMatchPublisher
 {
     Task NewMatchReady(string matchId, GameTypeEnum regime, List<string> usersIp);
     Task UserAddToMatch(string matchId, string userId, MatchStatusEnum matchStatus);
-    Task MatchStatusUpdate(string matchId, MatchStatusEnum newStatus);
-    Task MatchCancelled(string matchId, string reason);
+    Task UserRemoveFromMatch(string userId, string matchId);
+    Task MatchStart(string matchId);
+    Task MatchCancelled(string matchId, MatchCancelEnum matchCancel);
+    Task MatchEnd(string matchId, List<MatchPlayerResult> results);
 }

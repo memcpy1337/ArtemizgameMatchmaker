@@ -1,13 +1,12 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class @ref : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,14 +15,13 @@ namespace Infrastructure.Migrations
                 name: "Matches",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    MatchId = table.Column<string>(type: "text", nullable: false),
+                    Id = table.Column<string>(type: "text", nullable: false),
                     Regime = table.Column<int>(type: "integer", nullable: false),
                     OwnerUserId = table.Column<string>(type: "text", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    DateFinish = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    DateFinish = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -31,17 +29,25 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    Elo = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Servers",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ServerId = table.Column<string>(type: "text", nullable: false),
+                    Id = table.Column<string>(type: "text", nullable: false),
                     IsReady = table.Column<bool>(type: "boolean", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    Ip = table.Column<string>(type: "text", nullable: false),
-                    Port = table.Column<int>(type: "integer", nullable: false),
-                    MatchId = table.Column<int>(type: "integer", nullable: false)
+                    MatchId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -55,51 +61,55 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Users",
+                name: "UserToMatches",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     UserId = table.Column<string>(type: "text", nullable: false),
-                    Elo = table.Column<int>(type: "integer", nullable: false),
-                    MatchId = table.Column<int>(type: "integer", nullable: true),
-                    PlayerType = table.Column<int>(type: "integer", nullable: false),
-                    Regime = table.Column<int>(type: "integer", nullable: false),
+                    MatchId = table.Column<string>(type: "text", nullable: false),
+                    Id = table.Column<int>(type: "integer", nullable: false),
                     Ticket = table.Column<string>(type: "text", nullable: false),
-                    IsActive = table.Column<bool>(type: "boolean", nullable: false)
+                    UserType = table.Column<int>(type: "integer", nullable: false),
+                    UserIp = table.Column<string>(type: "text", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    IsConnected = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.PrimaryKey("PK_UserToMatches", x => new { x.UserId, x.MatchId });
                     table.ForeignKey(
-                        name: "FK_Users_Matches_MatchId",
+                        name: "FK_UserToMatches_Matches_MatchId",
                         column: x => x.MatchId,
                         principalTable: "Matches",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserToMatches_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Matches_MatchId",
+                name: "IX_Matches_Id",
                 table: "Matches",
-                column: "MatchId")
+                column: "Id")
                 .Annotation("Npgsql:IndexInclude", new[] { "IsActive" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Servers_MatchId",
                 table: "Servers",
-                column: "MatchId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_MatchId",
-                table: "Users",
                 column: "MatchId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_UserId",
+                name: "IX_Users_Id",
                 table: "Users",
-                column: "UserId")
-                .Annotation("Npgsql:IndexInclude", new[] { "IsActive" });
+                column: "Id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserToMatches_MatchId",
+                table: "UserToMatches",
+                column: "MatchId");
         }
 
         /// <inheritdoc />
@@ -109,10 +119,13 @@ namespace Infrastructure.Migrations
                 name: "Servers");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "UserToMatches");
 
             migrationBuilder.DropTable(
                 name: "Matches");
+
+            migrationBuilder.DropTable(
+                name: "Users");
         }
     }
 }

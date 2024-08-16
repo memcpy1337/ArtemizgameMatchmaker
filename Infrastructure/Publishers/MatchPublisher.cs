@@ -1,4 +1,5 @@
 ﻿using Application.Common.Interfaces;
+using Contracts.Common.Models;
 using Contracts.Common.Models.Enums;
 using Contracts.Events.MatchMakingEvents;
 using MassTransit;
@@ -22,21 +23,13 @@ public class MatchPublisher : IMatchPublisher
         _bus = bus;
     }
 
-    public async Task MatchCancelled(string matchId, string reason)
+    public async Task MatchCancelled(string matchId, MatchCancelEnum matchCancel)
     {
+        
         await _bus.Publish<MatchCancelEvent>(new MatchCancelEvent()
         {
             MatchId = matchId,
-            ReasonMsg = reason
-        });
-    }
-
-    public async Task MatchStatusUpdate(string matchId, MatchStatusEnum newStatus)
-    {
-        await _bus.Publish<MatchStatusUpdateEvent>(new MatchStatusUpdateEvent() 
-        { 
-            MatchId = matchId, 
-            NewStatus = newStatus 
+            Reason = matchCancel
         });
     }
 
@@ -57,6 +50,32 @@ public class MatchPublisher : IMatchPublisher
             MatchId = matchId,
             UserId = userId,
             MatchStatus = matchStatus
+        });
+    }
+
+    public async Task MatchStart(string matchId)
+    {
+        await _bus.Publish<MatchStartEvent>(new MatchStartEvent()
+        {
+            MatchId = matchId
+        });
+    }
+
+    public async Task MatchEnd(string matchId, List<MatchPlayerResult> results)
+    {
+        await _bus.Publish<MatchEndEvent>(new MatchEndEvent()
+        {
+            MatchId = matchId,
+            Results = results
+        });
+    }
+
+    public async Task UserRemoveFromMatch(string userId, string matchId)
+    {
+        await _bus.Publish<MatchPlayerRemoveEvent>(new MatchPlayerRemoveEvent()
+        {
+            UserId = userId,
+            MatchId = matchId
         });
     }
 }

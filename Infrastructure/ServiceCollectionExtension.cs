@@ -1,5 +1,6 @@
 ﻿using Application.Common.Interfaces;
 using Application.Common.Validators.Match;
+using Contracts.Events.ServerEvents;
 using FluentValidation;
 using Infrastructure.Common.Models;
 using Infrastructure.Consumers;
@@ -44,7 +45,8 @@ public static class ServiceCollectionExtension
             busConfig.AddConsumer<PlayerConnectionConsumer>();
             busConfig.AddConsumer<PlayerDisconnectionConsumer>();
             busConfig.AddConsumer<ServerReadyConsumer>();
-
+            busConfig.AddConsumer<ServerBadDownConsumer>();
+            busConfig.AddConsumer<ServerGameEndConsumer>();
 #if DEBUG
             var stringSettings = Environment.GetEnvironmentVariable("MessageBrokerDebug");
             var settings = JsonConvert.DeserializeObject<MessageBrokerSettings>(stringSettings);

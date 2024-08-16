@@ -8,10 +8,9 @@ namespace Domain.Entities;
 
 public class Server
 {
-    public int Id { get; set; }
-    public required string ServerId { get; set; }
+    public required string Id { get; set; }
     public bool IsReady { get; set; }
     public bool IsActive { get; set; }
-    public int MatchId { get; set; }
+    public required string MatchId { get; set; }
     public Match Match { get; set; } = null!;
 }

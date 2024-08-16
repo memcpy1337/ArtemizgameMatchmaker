@@ -13,11 +13,12 @@ public class QueueService : IQueueService
 {
     private readonly IQueueRepository _queueRepository;
     private readonly IQueuePublisher _queuePublisher;
-
-    public QueueService(IQueueRepository queueRepository, IQueuePublisher queuePublisher)
+    private readonly IMatchService _matchService;
+    public QueueService(IQueueRepository queueRepository, IQueuePublisher queuePublisher, IMatchService matchService)
     {
         _queuePublisher = queuePublisher;
         _queueRepository = queueRepository;
+        _matchService = matchService;
     }
 
     public async Task AddUserToQueueAsync(UserQueueRequest userQueueRequest, CancellationToken cancellationToken)
@@ -26,9 +27,9 @@ public class QueueService : IQueueService
         await _queuePublisher.AddedUserToQueueAsync(userQueueRequest);
     }
 
-    public async Task<UserQueueRequest?> GetUserFromQueueAsync()
+    public async Task<List<UserQueueRequest>?> GetUsersFromQueueAsync(int count)
     {
-        return await _queueRepository.PopAsync();
+        return await _queueRepository.PopAsync(count);
     }
 
     public async Task<bool> IsInQueue(string userId)
@@ -36,13 +37,20 @@ public class QueueService : IQueueService
         return await _queueRepository.IsInQueue(userId);
     }
 
-    public Task RemoveUserFromQueueAsync(string userId, CancellationToken cancellationToken)
+    public async Task RemoveUserFromQueueAsync(string userId, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        if (await IsInQueue(userId)) 
+        {
+            await _queueRepository.RemoveUserFromQueueAsync(userId, cancellationToken);
+        }
+        else
+        {
+            await _matchService.RemovePlayerFromMatch(userId);
+        }
     }
 
-    public async Task ReturnToQueueAsync(UserQueueRequest userQueueRequest, CancellationToken cancellationToken)
+    public async Task ReturnToQueueAsync(List<UserQueueRequest> userQueueRequests, CancellationToken cancellationToken)
     {
-        await _queueRepository.ReturnToQueueAsync(userQueueRequest, CancellationToken.None);
+        await _queueRepository.ReturnToQueueAsync(userQueueRequests, CancellationToken.None);
     }
 }

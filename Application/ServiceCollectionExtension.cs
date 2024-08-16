@@ -49,6 +49,7 @@ public static class ServiceCollectionExtension
         services.AddHttpContextAccessor();
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(AuthorizedUserContextBehavior<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(UserIpContextBehaviour<,>));
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(AuthorizedServerContextBehaviour<,>));
 
         services.AddHostedService<QueueTick>();
         services.AddHostedService<TaskQueueTick>();
