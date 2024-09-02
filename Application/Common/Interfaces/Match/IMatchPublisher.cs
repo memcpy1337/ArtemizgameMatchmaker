@@ -10,7 +10,8 @@ namespace Application.Common.Interfaces;
 
 public interface IMatchPublisher
 {
-    Task NewMatchReady(string matchId, GameTypeEnum regime, List<string> usersIp);
+    Task NewMatchCreated(string matchId, GameTypeEnum regime, List<string> usersIp);
+    Task NewMatchReady(string matchId);
     Task UserAddToMatch(string matchId, string userId, MatchStatusEnum matchStatus);
     Task UserRemoveFromMatch(string userId, string matchId);
     Task MatchStart(string matchId);

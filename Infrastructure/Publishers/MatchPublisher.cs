@@ -33,7 +33,7 @@ public class MatchPublisher : IMatchPublisher
         });
     }
 
-    public async Task NewMatchReady(string matchId, GameTypeEnum regime, List<string> usersIp)
+    public async Task NewMatchCreated(string matchId, GameTypeEnum regime, List<string> usersIp)
     {
         await _bus.Publish<MatchNewEvent>(new MatchNewEvent()
         {
@@ -75,6 +75,14 @@ public class MatchPublisher : IMatchPublisher
         await _bus.Publish<MatchPlayerRemoveEvent>(new MatchPlayerRemoveEvent()
         {
             UserId = userId,
+            MatchId = matchId
+        });
+    }
+
+    public async Task NewMatchReady(string matchId)
+    {
+        await _bus.Publish<MatchReadyEvent>(new MatchReadyEvent
+        {
             MatchId = matchId
         });
     }

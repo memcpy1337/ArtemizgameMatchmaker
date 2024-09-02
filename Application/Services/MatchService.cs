@@ -57,7 +57,8 @@ public class MatchService : IMatchService
                         IsConnected = false,
                         UserId = player.UserId,
                         MatchId = match.Id,
-                        UserIp = player.UserIp
+                        UserIp = player.UserIp,
+                        UserType = player.PlayerType
                     });
                 }
 
@@ -65,7 +66,12 @@ public class MatchService : IMatchService
 
                 await transaction.CommitAsync();
 
-                await _matchPublisher.NewMatchReady(match.Id, match.Regime, match.Users.Select(x => x.UserIp).ToList());
+                foreach(var player in players)
+                {
+                    await _matchPublisher.UserAddToMatch(match.Id, player.UserId, MatchStatusEnum.WaitForServer);
+                }
+
+                await _matchPublisher.NewMatchCreated(match.Id, match.Regime, match.Users.Select(x => x.UserIp).ToList());
 
                 await SetTimeouts(MatchStatusEnum.WaitForPlayers, MatchStatusEnum.WaitForServer, match.Id);
             }
@@ -139,6 +145,11 @@ public class MatchService : IMatchService
         await SetTimeouts(match.Status, matchStatus, matchId);
 
         await _matchRepository.UpdateStatus(matchStatus, match.Id);
+
+        if (matchStatus == MatchStatusEnum.WaitPlayerConnect)
+        {
+            await _matchPublisher.NewMatchReady(matchId);
+        }
 
         return true;
     }
