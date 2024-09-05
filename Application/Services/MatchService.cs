@@ -45,7 +45,6 @@ public class MatchService : IMatchService
             try
             {
                 match.DateCreated = DateTime.Now.ToUniversalTime();
-                match.IsActive = true;
                 match.Status = MatchStatusEnum.WaitForServer;
 
                 foreach(var player in players)

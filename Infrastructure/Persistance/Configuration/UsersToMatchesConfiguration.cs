@@ -24,5 +24,9 @@ public class UsersToMatchesConfiguration : IEntityTypeConfiguration<UserToMatch>
             .HasOne(ut => ut.Match)
             .WithMany(m => m.Users)
             .HasForeignKey(ut => ut.MatchId);
+
+        builder.HasIndex(x => x.MatchId).IncludeProperties(b => b.IsActive).IncludeProperties(b => b.IsConnected);
+        builder.HasIndex(x => x.UserId);
+        builder.HasIndex(x => x.Ticket);
     }
 }

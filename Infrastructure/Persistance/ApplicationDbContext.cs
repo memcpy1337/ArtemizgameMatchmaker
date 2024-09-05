@@ -20,7 +20,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     public DbSet<User> Users { get; set; }
     public DbSet<Match> Matches { get; set; }
-    public DbSet<Server> Servers { get; set; }
     public DbSet<UserToMatch> UserToMatches { get; set; }
 
     public DatabaseFacade DatabaseFescade { get { return base.Database; } }

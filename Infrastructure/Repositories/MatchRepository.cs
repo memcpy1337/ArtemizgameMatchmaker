@@ -26,7 +26,9 @@ public class MatchRepository : IMatchRepository
 
     public async Task<Match?> Get(string matchId)
     {
-        return await _applicationDb.Matches.Include(u => u.Users.Where(x => x.IsActive)).FirstOrDefaultAsync(x => x.Id == matchId && x.IsActive);
+        return await _applicationDb.Matches
+            .Include(u => u.Users.Where(x => x.IsActive))
+            .FirstOrDefaultAsync(x => x.Id == matchId && (x.Status != MatchStatusEnum.End || x.Status != MatchStatusEnum.Cancelled));
     }
 
     public async Task UpdateStatus(MatchStatusEnum status, string matchId)

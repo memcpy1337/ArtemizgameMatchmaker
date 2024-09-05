@@ -10,7 +10,7 @@ public class MatchConfiguration : IEntityTypeConfiguration<Match>
     {
         builder.HasKey(i => i.Id);
 
-        builder.HasIndex(x => x.Id).IncludeProperties(b => b.IsActive);
+        builder.HasIndex(x => x.Id).IncludeProperties(b => b.Status);
 
     }
 }
