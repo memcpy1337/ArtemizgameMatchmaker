@@ -3,14 +3,17 @@ using Application.Common.Interfaces;
 using Application.Common.Models;
 using Application.Common.Wrappers;
 using Contracts.Common.Models.Enums;
+using Contracts.Events.UserEvents;
 using Domain.Exceptions;
 using Forbids;
+using MassTransit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Response = Application.Common.Models.Response;
 
 namespace Application.Commands.Data;
 
@@ -25,12 +28,14 @@ internal sealed class RedeemTicketCommandHandler : IHandlerWrapper<RedeemTicketC
     private readonly IForbid _forbid;
     private readonly IQueueService _queueService;
     private readonly IUserToMatchRepository _userToMatchRepository;
+    private readonly IRequestClient<UserInfoRequest> _clientUserInfo;
 
-    public RedeemTicketCommandHandler(IForbid forbid, IQueueService queueService, IUserToMatchRepository userToMatch)
+    public RedeemTicketCommandHandler(IForbid forbid, IQueueService queueService, IUserToMatchRepository userToMatch, IRequestClient<UserInfoRequest> clientUserInfo)
     {
         _queueService = queueService;
         _forbid = forbid;
         _userToMatchRepository = userToMatch;
+        _clientUserInfo = clientUserInfo;
     }
 
     public async Task<IResponse<RedeemTicketResponse>> Handle(RedeemTicketCommand request, CancellationToken cancellationToken)
@@ -39,9 +44,13 @@ internal sealed class RedeemTicketCommandHandler : IHandlerWrapper<RedeemTicketC
 
         _forbid.Null(data, TicketIncorrentException.Instance);
 
+        var response = await _clientUserInfo.GetResponse<UserInfoResponse>(new UserInfoRequest() { UserId = data!.UserId }, cancellationToken);
+
+        _forbid.Null(response, TicketIncorrentException.Instance);
+
         return Response.Success(new RedeemTicketResponse() 
         { 
-            NickName = data!.User.Elo.ToString(),
+            NickName = response.Message.NickName,
             UserId = data!.User.Id,
             PlayerType = data!.UserType
         });

@@ -1,6 +1,7 @@
 ﻿using Application.Common.Interfaces;
 using Application.Common.Validators.Match;
 using Contracts.Events.ServerEvents;
+using Contracts.Events.UserEvents;
 using FluentValidation;
 using Infrastructure.Common.Models;
 using Infrastructure.Consumers;
@@ -54,6 +55,9 @@ public static class ServiceCollectionExtension
             var stringSettings = Environment.GetEnvironmentVariable("MessageBroker");
             var settings = JsonConvert.DeserializeObject<MessageBrokerSettings>(stringSettings);
 #endif
+            busConfig.AddRequestClient<UserInfoRequest>(new Uri("exchange:user-info"));
+
+
             busConfig.UsingRabbitMq((context, configuration) =>
             {
                 configuration.Host(new Uri(settings.Host!), h =>
