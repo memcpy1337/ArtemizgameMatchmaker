@@ -38,6 +38,11 @@ public class QueueService : IQueueService
         return await _queueRepository.IsInQueue(userId);
     }
 
+    public async Task RedeemUserQueue(string userId, CancellationToken cancellationToken)
+    {
+        await _queueRepository.RemoveUserFromQueueAsync(userId, cancellationToken);
+    }
+
     public async Task RemoveUserFromQueueAsync(string userId, CancellationToken cancellationToken)
     {
         if (await IsInQueue(userId)) 

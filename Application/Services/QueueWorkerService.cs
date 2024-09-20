@@ -78,7 +78,7 @@ public class QueueWorkerService : IQueueWorkerService
 
                 foreach(var user in match.Value)
                 {
-                    await _queueService.RemoveUserFromQueueAsync(user.UserId, CancellationToken.None);
+                    await _queueService.RedeemUserQueue(user.UserId, CancellationToken.None);
                 }
             }
 
