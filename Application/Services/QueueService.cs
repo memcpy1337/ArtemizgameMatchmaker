@@ -14,6 +14,7 @@ public class QueueService : IQueueService
     private readonly IQueueRepository _queueRepository;
     private readonly IQueuePublisher _queuePublisher;
     private readonly IMatchService _matchService;
+
     public QueueService(IQueueRepository queueRepository, IQueuePublisher queuePublisher, IMatchService matchService)
     {
         _queuePublisher = queuePublisher;
@@ -42,6 +43,7 @@ public class QueueService : IQueueService
         if (await IsInQueue(userId)) 
         {
             await _queueRepository.RemoveUserFromQueueAsync(userId, cancellationToken);
+            await _queuePublisher.RemovedUserFromQueueAsync(userId);
         }
         else
         {

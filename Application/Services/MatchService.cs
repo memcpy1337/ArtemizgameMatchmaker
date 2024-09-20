@@ -125,9 +125,8 @@ public class MatchService : IMatchService
                         break;
                 }
 
-
-            
         }
+
         // publish event
     }
 
