@@ -146,7 +146,10 @@ public class MatchService : IMatchService
 
         if (matchStatus == MatchStatusEnum.WaitPlayerConnect)
         {
-            await _matchPublisher.NewMatchReady(matchId);
+            foreach (var user in match.Users)
+            {
+                await _matchPublisher.NewMatchReady(matchId, user.UserId);
+            }
         }
 
         return true;
@@ -191,8 +194,10 @@ public class MatchService : IMatchService
 
                 await transaction.CommitAsync();
 
-                await _matchPublisher.MatchCancelled(matchId, matchCancel);
-
+                foreach (var user in match.Users)
+                {
+                    await _matchPublisher.MatchCancelled(matchId, user.UserId, matchCancel);
+                }
             }
             catch (DbUpdateException ex)
             {
@@ -238,6 +243,22 @@ public class MatchService : IMatchService
         if (!match.Users.Where(x => x.IsConnected).Any() && (match.Status != MatchStatusEnum.End && match.Status != MatchStatusEnum.Cancelled))
         {
             await CancelMatch(match.Id, MatchCancelEnum.NoPlayerInMatch);
+        }
+    }
+
+    public async Task ServerConnectionDataRecive(string matchId, string address, int port)
+    {
+        var match = await _matchRepository.Get(matchId);
+
+        if (match == null)
+        {
+            _logger.LogError("Connection data update failed: match not found");
+            return;
+        }
+
+        foreach (var user in match.Users)
+        {
+            await _matchPublisher.ConnectionDataUpdate(matchId, user.UserId, address, port);
         }
     }
 

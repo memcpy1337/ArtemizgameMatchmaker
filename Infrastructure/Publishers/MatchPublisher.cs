@@ -23,11 +23,12 @@ public class MatchPublisher : IMatchPublisher
         _bus = bus;
     }
 
-    public async Task MatchCancelled(string matchId, MatchCancelEnum matchCancel)
+    public async Task MatchCancelled(string matchId, string userId, MatchCancelEnum matchCancel)
     {
         
         await _bus.Publish<MatchCancelEvent>(new MatchCancelEvent()
         {
+            UserId = userId,
             MatchId = matchId,
             Reason = matchCancel
         });
@@ -79,10 +80,22 @@ public class MatchPublisher : IMatchPublisher
         });
     }
 
-    public async Task NewMatchReady(string matchId)
+    public async Task ConnectionDataUpdate(string matchId, string userId, string address, int port)
+    {
+        await _bus.Publish<MatchDataUpdate>(new MatchDataUpdate
+        {
+            UserId = userId,
+            MatchId = matchId,
+            Address = address,
+            Port = port
+        });
+    }
+
+    public async Task NewMatchReady(string matchId, string userId)
     {
         await _bus.Publish<MatchReadyEvent>(new MatchReadyEvent
         {
+            UserId = userId,
             MatchId = matchId
         });
     }

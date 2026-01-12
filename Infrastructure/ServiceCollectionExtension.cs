@@ -45,6 +45,7 @@ public static class ServiceCollectionExtension
             busConfig.AddConsumer<ServerDeployConsumer>();
             busConfig.AddConsumer<PlayerConnectionConsumer>();
             busConfig.AddConsumer<PlayerDisconnectionConsumer>();
+            busConfig.AddConsumer<ServerConnectionDataUpdateConsumer>();
             busConfig.AddConsumer<ServerReadyConsumer>();
             busConfig.AddConsumer<ServerBadDownConsumer>();
             busConfig.AddConsumer<ServerGameEndConsumer>();

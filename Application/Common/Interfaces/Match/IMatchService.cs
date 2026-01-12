@@ -18,4 +18,5 @@ public interface IMatchService
     Task UserConnectedToMatch(string userId);
     Task UserDisconnectedFromMatch(string userId);
     Task<bool> UpdateMatchStatus(MatchStatusEnum matchStatus, string matchId);
+    Task ServerConnectionDataRecive(string matchId, string address, int port);
 }
