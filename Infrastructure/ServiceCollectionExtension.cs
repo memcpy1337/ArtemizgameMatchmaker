@@ -81,7 +81,7 @@ public static class ServiceCollectionExtension
         var redisStringSettings = Environment.GetEnvironmentVariable("RedisSettingsMatchmakerDebug");
         var redisSettings = JsonConvert.DeserializeObject<RedisSettings>(redisStringSettings);
 #else
-        var redisStringSettings = Environment.GetEnvironmentVariable("RedisSettings");
+        var redisStringSettings = Environment.GetEnvironmentVariable("RedisMatchmakingSettings");
         var redisSettings = JsonConvert.DeserializeObject<RedisSettings>(redisStringSettings);
 #endif
         var config = new ConfigurationOptions
