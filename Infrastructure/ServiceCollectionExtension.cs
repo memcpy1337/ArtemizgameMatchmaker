@@ -49,6 +49,7 @@ public static class ServiceCollectionExtension
             busConfig.AddConsumer<ServerReadyConsumer>();
             busConfig.AddConsumer<ServerBadDownConsumer>();
             busConfig.AddConsumer<ServerGameEndConsumer>();
+            busConfig.AddConsumer<UserLobbyDisconnectionConsumer>();
 #if DEBUG
             var stringSettings = Environment.GetEnvironmentVariable("MessageBrokerDebug");
             var settings = JsonConvert.DeserializeObject<MessageBrokerSettings>(stringSettings);
